@@ -2,15 +2,28 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         colors="true">
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true"
+         beStrictAboutOutputDuringTests="true">
     <testsuites>
-        <testsuite name="Test Suite">
+        <testsuite name="Laravel QoL Test Suite">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
-    <coverage>
+    <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">./src</directory>
         </include>
+        <exclude>
+            <directory>./src/Database</directory>
+        </exclude>
     </coverage>
+    <php>
+        <env name="APP_KEY" value="base64:2fl3rkEWxUIXxB8CqbvDQz9HL1Q3M0Sv64Cj9jKaHBQ="/>
+        <env name="DB_CONNECTION" value="testbench"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+    </php>
 </phpunit>

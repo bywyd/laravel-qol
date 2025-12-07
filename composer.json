@@ -11,7 +11,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Bywyd\\LaravelQol\\Tests\\": "tests/"
+            "Bywyd\\LaravelQol\\Tests\\": "tests/",
+            "Bywyd\\LaravelQol\\Tests\\Fixtures\\": "tests/Fixtures/"
         }
     },
     "authors": [
@@ -35,6 +36,10 @@
                 "Bywyd\\LaravelQol\\LaravelQolServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
