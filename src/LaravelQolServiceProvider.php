@@ -3,6 +3,10 @@
 namespace Bywyd\LaravelQol;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Routing\Router;
+use Bywyd\LaravelQol\Middleware\RoleMiddleware;
+use Bywyd\LaravelQol\Middleware\PermissionMiddleware;
+use Bywyd\LaravelQol\Middleware\RoleOrPermissionMiddleware;
 
 class LaravelQolServiceProvider extends ServiceProvider
 {
@@ -35,6 +39,21 @@ class LaravelQolServiceProvider extends ServiceProvider
         // Load migrations automatically if running in console
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        }
+
+        // Register middleware
+        $router = $this->app->make(Router::class);
+        $router->aliasMiddleware('role', RoleMiddleware::class);
+        $router->aliasMiddleware('permission', PermissionMiddleware::class);
+        $router->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
+
+        // Register permissions and blade directives
+        if (config('laravel-qol.permissions.enable_blade_directives', true)) {
+            PermissionRegistrar::registerBladeDirectives();
+        }
+
+        if (config('laravel-qol.permissions.auto_register_permissions_as_gates', true)) {
+            PermissionRegistrar::registerPermissions();
         }
     }
 }

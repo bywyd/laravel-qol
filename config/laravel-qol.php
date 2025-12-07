@@ -89,4 +89,26 @@ return [
         // Maximum file size in kilobytes
         'max_size' => 102400, // 100MB
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Permissions & Roles Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configure default behavior for the roles and permissions system.
+    |
+    */
+    'permissions' => [
+        // Automatically register permissions as Laravel gates
+        'auto_register_permissions_as_gates' => true,
+
+        // Enable Blade directives (@role, @permission, etc.)
+        'enable_blade_directives' => true,
+
+        // Cache permissions for performance
+        'cache_permissions' => true,
+
+        // Cache TTL in seconds
+        'cache_ttl' => 3600,
+    ],
 ];
