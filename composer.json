@@ -1,0 +1,41 @@
+{
+    "name": "bywyd/laravel-qol",
+    "description": "Quality of Life enhancements for Laravel - supportive tools, traits, and utilities",
+    "keywords": ["laravel", "traits", "utilities", "quality-of-life", "helpers"],
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Bywyd\\LaravelQol\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bywyd\\LaravelQol\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Omer Faruk Isil",
+            "email": "omer_farukisil01@hotmail.com.tr"
+        }
+    ],
+    "require": {
+        "php": "^8.1|^8.2|^8.3",
+        "illuminate/support": "^10.0|^11.0",
+        "illuminate/database": "^10.0|^11.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0",
+        "phpunit/phpunit": "^10.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Bywyd\\LaravelQol\\LaravelQolServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
