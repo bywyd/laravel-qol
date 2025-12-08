@@ -9,6 +9,7 @@ use Bywyd\LaravelQol\Traits\HasStatus;
 use Bywyd\LaravelQol\Traits\Sortable;
 use Bywyd\LaravelQol\Traits\Cacheable;
 use Bywyd\LaravelQol\Traits\Searchable;
+use Bywyd\LaravelQol\Traits\HasSettings;
 use Illuminate\Database\Eloquent\Model;
 
 class TestModel extends Model
@@ -20,6 +21,7 @@ class TestModel extends Model
     use Sortable;
     use Cacheable;
     use Searchable;
+    use HasSettings;
 
     protected $table = 'test_models';
 

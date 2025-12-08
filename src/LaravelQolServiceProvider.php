@@ -33,6 +33,11 @@ class LaravelQolServiceProvider extends ServiceProvider
             __DIR__.'/../config/laravel-qol.php',
             'laravel-qol'
         );
+
+        // Register Settings Manager
+        $this->app->singleton('laravel-qol.settings', function ($app) {
+            return new \Bywyd\LaravelQol\Services\SettingsManager();
+        });
     }
 
     /**

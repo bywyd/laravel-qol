@@ -51,6 +51,18 @@ All notable changes to `laravel-qol` will be documented in this file.
   - TrimStrings: Auto-trim inputs with exceptions
   - ApiVersioning: Multi-version API support
   - CorsMiddleware: Advanced CORS configuration
+- **Universal Settings System**
+  - App-wide settings via Settings facade
+  - Per-user settings with HasSettings trait
+  - Per-model settings for any Eloquent model
+  - Support for all data types (string, int, float, bool, array, json)
+  - Group organization for logical separation
+  - Public/private visibility control
+  - Automatic caching with configurable TTL
+  - Increment/decrement numeric values
+  - Toggle boolean values
+  - Metadata support for additional context
+  - Batch set/get/clear operations
 - **Database**
   - Migrations for all tables (model_histories, photo_images, files, videos, roles, permissions, user_integrations, pivot tables)
   - Example seeder for roles and permissions

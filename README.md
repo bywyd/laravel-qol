@@ -16,6 +16,7 @@
 - **HasHistory Trait** - Automatic model change tracking
 - **HasRoles Trait** - Complete role and permission system for users
 - **HasIntegrations Trait** - Manage user integrations with OAuth, API keys, and credentials
+- **HasSettings Trait** - Universal settings system (app-wide, per-user, per-model)
 - **HasUuid Trait** - Automatic UUID generation for models
 - **HasSlug Trait** - Automatic slug generation from any field
 - **HasStatus Trait** - Status management with active/inactive scopes
@@ -1056,6 +1057,204 @@ Route::middleware('cors')->group(function () {
     'allowed_headers' => ['Content-Type', 'Authorization'],
     'allow_credentials' => false,
 ],
+```
+
+## Universal Settings System
+
+Flexible settings system supporting app-wide, per-user, and per-model settings.
+
+### App-Wide Settings
+
+Use the `Settings` facade for application-level settings:
+
+```php
+use Bywyd\LaravelQol\Facades\Settings;
+
+// Set settings
+Settings::set('site_name', 'My Application');
+Settings::set('items_per_page', 25);
+Settings::set('maintenance_mode', false);
+Settings::set('features', ['api', 'webhooks', 'exports']);
+
+// Organize by groups
+Settings::set('smtp_host', 'smtp.gmail.com', 'email');
+Settings::set('smtp_port', 587, 'email');
+Settings::set('theme_color', '#FF5733', 'appearance');
+
+// Get settings
+$siteName = Settings::get('site_name');
+$perPage = Settings::get('items_per_page', 10); // with default
+
+// Get all settings in a group
+$emailSettings = Settings::getGroup('email');
+// ['smtp_host' => 'smtp.gmail.com', 'smtp_port' => 587]
+
+// Check if exists
+if (Settings::has('api_key')) {
+    //
+}
+
+// Remove setting
+Settings::remove('old_setting');
+
+// Set multiple at once
+Settings::setMultiple([
+    'key1' => 'value1',
+    'key2' => 'value2',
+], 'group_name');
+
+// Increment/Decrement numeric values
+Settings::increment('page_views');
+Settings::decrement('credits', 5);
+
+// Toggle boolean values
+Settings::toggle('feature_enabled');
+
+// Store with metadata
+Settings::set('api_key', 'secret', 'api', true, [
+    'description' => 'Third-party API key',
+    'editable' => false,
+]);
+```
+
+### Per-User Settings
+
+Add the `HasSettings` trait to your User model:
+
+```php
+use Bywyd\LaravelQol\Traits\HasSettings;
+
+class User extends Authenticatable
+{
+    use HasSettings;
+}
+
+// Set user preferences
+$user->setSetting('theme', 'dark');
+$user->setSetting('language', 'es');
+$user->setSetting('notifications_enabled', true);
+$user->setSetting('email_frequency', 'daily', 'notifications');
+
+// Get user settings
+$theme = $user->getSetting('theme', 'light'); // with default
+$language = $user->getSetting('language');
+
+// Organize by groups
+$user->setSetting('push_enabled', true, 'notifications');
+$user->setSetting('email_enabled', false, 'notifications');
+$notificationSettings = $user->getSettingsGroup('notifications');
+
+// Get all user settings
+$allSettings = $user->getAllSettings();
+// ['general.theme' => 'dark', 'general.language' => 'es', ...]
+
+// Public settings (visible to others)
+$user->setSetting('profile_visibility', 'public', 'privacy', true);
+$publicSettings = $user->getAllSettings(true); // only public
+
+// Batch operations
+$user->setSettings([
+    'theme' => 'dark',
+    'font_size' => 'medium',
+    'compact_mode' => true,
+], 'appearance');
+
+// Clear settings
+$user->clearSettings(); // all
+$user->clearSettings('notifications'); // specific group
+
+// Numeric operations
+$user->incrementSetting('posts_count');
+$user->decrementSetting('credits', 10);
+
+// Boolean operations
+$user->toggleSetting('notifications_enabled');
+```
+
+### Per-Model Settings
+
+Add the `HasSettings` trait to any model:
+
+```php
+use Bywyd\LaravelQol\Traits\HasSettings;
+
+class Post extends Model
+{
+    use HasSettings;
+}
+
+$post = Post::find(1);
+
+// Model-specific settings
+$post->setSetting('featured', true);
+$post->setSetting('visibility', 'public');
+$post->setSetting('allow_comments', true);
+$post->setSetting('views_count', 0, 'analytics');
+
+// Get settings
+$featured = $post->getSetting('featured', false);
+$visibility = $post->getSetting('visibility');
+
+// Analytics example
+$post->incrementSetting('views_count', 1, 'analytics');
+$post->setSetting('last_viewed_at', now(), 'analytics');
+
+$analytics = $post->getSettingsGroup('analytics');
+// ['views_count' => 150, 'last_viewed_at' => '2024-01-01 12:00:00']
+```
+
+### Settings Features
+
+**Type Support:**
+- String
+- Integer
+- Float
+- Boolean
+- Array
+- JSON
+
+**Automatic Caching:**
+- Settings are cached automatically
+- Cache cleared on update/delete
+- Configurable TTL
+
+**Organization:**
+- Group settings logically
+- Isolate by model instance
+- Public vs private settings
+
+**Metadata:**
+- Store additional info about settings
+- Descriptions, editability flags, etc.
+
+### Real-World Examples
+
+```php
+// E-commerce: Product settings
+$product->setSetting('on_sale', true);
+$product->setSetting('discount_percentage', 20);
+$product->setSetting('stock_alert_threshold', 5, 'inventory');
+
+// Blog: Post settings
+$post->setSetting('featured', true);
+$post->setSetting('allow_comments', false);
+$post->setSetting('publish_at', '2024-12-25 00:00:00', 'scheduling');
+
+// SaaS: Organization settings
+$organization->setSetting('max_users', 50, 'limits');
+$organization->setSetting('api_enabled', true, 'features');
+$organization->setSetting('webhook_url', 'https://...', 'integrations');
+
+// Multi-tenant: Tenant customization
+$tenant->setSetting('primary_color', '#FF5733', 'branding');
+$tenant->setSetting('logo_url', 'https://...', 'branding');
+$tenant->setSetting('custom_domain', 'tenant.example.com', 'domain');
+
+// User preferences dashboard
+$preferences = $user->getSettingsGroup('preferences');
+foreach ($preferences as $key => $value) {
+    echo "{$key}: {$value}";
+}
 ```
 
 
