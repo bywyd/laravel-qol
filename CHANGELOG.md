@@ -16,6 +16,7 @@ All notable changes to `laravel-qol` will be documented in this file.
 - **Model Enhancement Traits**
   - HasHistory trait for automatic change tracking
   - HasRoles trait for complete authorization system
+  - HasIntegrations trait for managing user integrations
   - HasUuid trait for automatic UUID generation
   - HasSlug trait for automatic slug generation
   - HasStatus trait for status management
@@ -30,8 +31,17 @@ All notable changes to `laravel-qol` will be documented in this file.
   - Blade directives for template authorization
   - Automatic Laravel Gate registration
   - Super admin with wildcard permissions
+- **User Integrations System**
+  - UserIntegration model for managing third-party integrations
+  - HasIntegrations trait for User model
+  - Automatic encryption of sensitive credentials
+  - Support for OAuth (access/refresh tokens)
+  - Support for API keys and secrets
+  - Integration metadata and status management
+  - Token expiration tracking
+  - Multiple integration types (oauth, api_key, webhook, custom)
 - **Database**
-  - Migrations for all tables (model_histories, photo_images, files, videos, roles, permissions, pivot tables)
+  - Migrations for all tables (model_histories, photo_images, files, videos, roles, permissions, user_integrations, pivot tables)
   - Example seeder for roles and permissions
 - **Configuration**
   - Customizable settings for all features

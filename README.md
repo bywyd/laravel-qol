@@ -15,6 +15,7 @@
 ### Model Enhancements
 - **HasHistory Trait** - Automatic model change tracking
 - **HasRoles Trait** - Complete role and permission system for users
+- **HasIntegrations Trait** - Manage user integrations with OAuth, API keys, and credentials
 - **HasUuid Trait** - Automatic UUID generation for models
 - **HasSlug Trait** - Automatic slug generation from any field
 - **HasStatus Trait** - Status management with active/inactive scopes
@@ -680,6 +681,224 @@ $user = User::find(1);
 $user->assignRole('super-admin');
 ```
 
+### HasIntegrations Trait
+
+Manage user integrations with third-party services:
+
+```php
+use Bywyd\LaravelQol\Traits\HasIntegrations;
+
+class User extends Authenticatable
+{
+    use HasIntegrations;
+}
+
+// Create OAuth integration (e.g., Google, GitHub, Facebook)
+$user->createOAuthIntegration('google', [
+    'provider_id' => '123456789',
+    'provider_name' => 'Google',
+    'access_token' => 'ya29.a0AfH6SMC...',
+    'refresh_token' => '1//0gOZp...',
+    'expires_in' => 3600, // seconds
+    'metadata' => [
+        'email' => 'user@gmail.com',
+        'name' => 'John Doe',
+        'avatar' => 'https://...',
+    ],
+]);
+
+// Create API Key integration (e.g., Stripe, AWS, SendGrid)
+$user->createApiKeyIntegration('stripe', [
+    'provider_name' => 'Stripe',
+    'api_key' => 'sk_test_51H...',
+    'api_secret' => 'whsec_...',
+    'metadata' => [
+        'account_id' => 'acct_123',
+        'mode' => 'test',
+    ],
+]);
+
+// Create custom integration
+$user->createIntegration('webhook', 'webhook', [
+    'provider_name' => 'My Webhook Service',
+    'credentials' => [
+        'url' => 'https://api.example.com/webhook',
+        'secret' => 'webhook_secret_123',
+    ],
+]);
+
+// Check if user has integration
+if ($user->hasIntegration('google')) {
+    // User has Google integration
+}
+
+// Check if integration is active
+if ($user->hasActiveIntegration('stripe')) {
+    // Stripe integration is active
+}
+
+// Get integration
+$integration = $user->getIntegration('google');
+
+// Access decrypted credentials
+$accessToken = $user->getIntegrationAccessToken('google');
+$apiKey = $user->getIntegrationApiKey('stripe');
+$apiSecret = $user->getIntegrationApiSecret('stripe');
+
+// Check token validity
+$integration = $user->getIntegration('google');
+if ($integration->hasValidToken()) {
+    // Token exists and not expired
+}
+
+// Activate/Deactivate integration
+$user->activateIntegration('google');
+$user->deactivateIntegration('stripe');
+
+// Remove integration
+$user->removeIntegration('github');
+
+// Update metadata
+$user->updateIntegrationMetadata('google', [
+    'last_sync' => now(),
+    'sync_count' => 5,
+]);
+
+// Mark as used (updates last_used_at)
+$user->markIntegrationAsUsed('stripe');
+
+// Get all integrations
+$user->integrations; // All integrations
+$user->activeIntegrations; // Only active
+
+// Filter by type
+$user->oauthIntegrations(); // OAuth only
+$user->apiKeyIntegrations(); // API keys only
+$user->validIntegrations(); // Valid tokens only
+
+// Query scopes
+UserIntegration::provider('google')->get();
+UserIntegration::type('oauth')->get();
+UserIntegration::active()->get();
+UserIntegration::validToken()->get();
+```
+
+### UserIntegration Model
+
+Direct model usage:
+
+```php
+use Bywyd\LaravelQol\Models\UserIntegration;
+
+$integration = UserIntegration::find(1);
+
+// Encrypted credential methods
+$integration->setAccessToken('new_token');
+$integration->setRefreshToken('new_refresh');
+$integration->setApiKey('sk_test_123');
+$integration->setApiSecret('secret_456');
+
+$integration->save();
+
+// Decrypted access
+$token = $integration->getDecryptedAccessToken();
+$refresh = $integration->getDecryptedRefreshToken();
+$apiKey = $integration->getDecryptedApiKey();
+$apiSecret = $integration->getDecryptedApiSecret();
+
+// Status checks
+$integration->isTokenExpired(); // Check if token expired
+$integration->hasValidToken(); // Token exists and not expired
+
+// Actions
+$integration->activate();
+$integration->deactivate();
+$integration->markAsUsed();
+
+// Relationships
+$integration->user; // Get the user
+```
+
+### Common Integration Examples
+
+```php
+// Google OAuth
+$user->createOAuthIntegration('google', [
+    'provider_id' => $googleUser->id,
+    'provider_name' => 'Google',
+    'access_token' => $googleUser->token,
+    'refresh_token' => $googleUser->refreshToken,
+    'expires_in' => $googleUser->expiresIn,
+    'metadata' => [
+        'email' => $googleUser->email,
+        'name' => $googleUser->name,
+    ],
+]);
+
+// GitHub OAuth
+$user->createOAuthIntegration('github', [
+    'provider_id' => $githubUser->id,
+    'provider_name' => 'GitHub',
+    'access_token' => $githubUser->token,
+    'metadata' => [
+        'username' => $githubUser->nickname,
+        'repos_url' => $githubUser->user['repos_url'],
+    ],
+]);
+
+// Stripe
+$user->createApiKeyIntegration('stripe', [
+    'provider_name' => 'Stripe',
+    'api_key' => config('services.stripe.secret'),
+    'metadata' => [
+        'customer_id' => $stripeCustomer->id,
+        'mode' => 'live',
+    ],
+]);
+
+// AWS
+$user->createApiKeyIntegration('aws', [
+    'provider_name' => 'AWS',
+    'api_key' => $credentials['access_key_id'],
+    'api_secret' => $credentials['secret_access_key'],
+    'credentials' => [
+        'region' => 'us-east-1',
+        'bucket' => 'my-bucket',
+    ],
+]);
+
+// SendGrid
+$user->createApiKeyIntegration('sendgrid', [
+    'provider_name' => 'SendGrid',
+    'api_key' => $sendgridApiKey,
+    'metadata' => [
+        'from_email' => 'noreply@example.com',
+        'from_name' => 'My App',
+    ],
+]);
+
+// Slack Webhook
+$user->createIntegration('slack', 'webhook', [
+    'provider_name' => 'Slack',
+    'credentials' => [
+        'webhook_url' => 'https://hooks.slack.com/services/...',
+        'channel' => '#general',
+    ],
+]);
+```
+
+### Security Features
+
+All sensitive data is automatically encrypted:
+- Access tokens
+- Refresh tokens
+- API keys
+- API secrets
+- Custom credentials
+
+The trait uses Laravel's built-in encryption, ensuring data is secure at rest.
+
+
 ## Available Traits
 
 ### Media Traits
@@ -690,6 +909,7 @@ $user->assignRole('super-admin');
 ### Model Enhancement Traits
 - **HasHistory** - Automatic change tracking with old/new values
 - **HasRoles** - Complete role & permission system with middleware and Blade directives
+- **HasIntegrations** - OAuth, API keys, and third-party service credentials
 - **HasUuid** - Auto-generate UUIDs on model creation
 - **HasSlug** - Auto-generate unique slugs from any field
 - **HasStatus** - Active/inactive status management
