@@ -1,0 +1,12 @@
+<?php
+
+use App\Modules\DummyClass\Controllers\DummyClassController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| DummyClass Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::resource('DummyRoute', DummyClassController::class);

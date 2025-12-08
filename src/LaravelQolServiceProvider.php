@@ -7,6 +7,10 @@ use Illuminate\Routing\Router;
 use Bywyd\LaravelQol\Middleware\RoleMiddleware;
 use Bywyd\LaravelQol\Middleware\PermissionMiddleware;
 use Bywyd\LaravelQol\Middleware\RoleOrPermissionMiddleware;
+use Bywyd\LaravelQol\Console\ServiceMakeCommand;
+use Bywyd\LaravelQol\Console\DtoMakeCommand;
+use Bywyd\LaravelQol\Console\ActionMakeCommand;
+use Bywyd\LaravelQol\Console\ModuleMakeCommand;
 
 class LaravelQolServiceProvider extends ServiceProvider
 {
@@ -54,6 +58,16 @@ class LaravelQolServiceProvider extends ServiceProvider
 
         if (config('laravel-qol.permissions.auto_register_permissions_as_gates', true)) {
             PermissionRegistrar::registerPermissions();
+        }
+
+        // Register Artisan commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ServiceMakeCommand::class,
+                DtoMakeCommand::class,
+                ActionMakeCommand::class,
+                ModuleMakeCommand::class,
+            ]);
         }
     }
 }

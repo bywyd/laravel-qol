@@ -1,0 +1,25 @@
+<?php
+
+namespace DummyNamespace;
+
+class DummyClass
+{
+    /**
+     * Create a new service instance.
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the service logic.
+     *
+     * @param  array  $data
+     * @return mixed
+     */
+    public function handle(array $data)
+    {
+        // Implement your service logic here
+    }
+}

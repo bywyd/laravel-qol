@@ -1,0 +1,44 @@
+<?php
+
+namespace DummyNamespace;
+
+use Illuminate\Http\Request;
+
+class DummyClass
+{
+    /**
+     * Create a new DTO instance.
+     *
+     * @param  string  $property
+     */
+    public function __construct(
+        public string $property,
+    ) {
+    }
+
+    /**
+     * Create DTO from request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return self
+     */
+    public static function fromRequest(Request $request): self
+    {
+        return new self(
+            property: $request->input('property'),
+        );
+    }
+
+    /**
+     * Create DTO from array.
+     *
+     * @param  array  $data
+     * @return self
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            property: $data['property'],
+        );
+    }
+}

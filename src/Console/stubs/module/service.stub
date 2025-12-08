@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Modules\DummyClass\Services;
+
+use App\Modules\DummyClass\Models\DummyClass;
+use Illuminate\Database\Eloquent\Collection;
+
+class DummyClassService
+{
+    /**
+     * Get all records.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getAll(): Collection
+    {
+        return DummyClass::all();
+    }
+
+    /**
+     * Find a record by ID.
+     *
+     * @param  int  $id
+     * @return \App\Modules\DummyClass\Models\DummyClass|null
+     */
+    public function findById(int $id): ?DummyClass
+    {
+        return DummyClass::find($id);
+    }
+
+    /**
+     * Create a new record.
+     *
+     * @param  array  $data
+     * @return \App\Modules\DummyClass\Models\DummyClass
+     */
+    public function create(array $data): DummyClass
+    {
+        return DummyClass::create($data);
+    }
+
+    /**
+     * Update a record.
+     *
+     * @param  int  $id
+     * @param  array  $data
+     * @return bool
+     */
+    public function update(int $id, array $data): bool
+    {
+        $DummyVariable = $this->findById($id);
+
+        if (!$DummyVariable) {
+            return false;
+        }
+
+        return $DummyVariable->update($data);
+    }
+
+    /**
+     * Delete a record.
+     *
+     * @param  int  $id
+     * @return bool
+     */
+    public function delete(int $id): bool
+    {
+        $DummyVariable = $this->findById($id);
+
+        if (!$DummyVariable) {
+            return false;
+        }
+
+        return $DummyVariable->delete();
+    }
+}

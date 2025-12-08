@@ -1,0 +1,17 @@
+<?php
+
+namespace DummyNamespace;
+
+class DummyClass
+{
+    /**
+     * Execute the action.
+     *
+     * @param  array  $data
+     * @return mixed
+     */
+    public function __invoke(array $data)
+    {
+        // Implement your action logic here
+    }
+}
