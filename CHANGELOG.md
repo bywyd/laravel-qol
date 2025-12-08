@@ -40,6 +40,17 @@ All notable changes to `laravel-qol` will be documented in this file.
   - Integration metadata and status management
   - Token expiration tracking
   - Multiple integration types (oauth, api_key, webhook, custom)
+- **Production-Ready Middleware**
+  - SetLocale: Automatic localization from headers/session/user
+  - RestrictAccess: Maintenance mode with IP/role restrictions
+  - ForceJsonResponse: Force JSON for API applications
+  - LogRequestResponse: Request/response logging with sanitization
+  - SecurityHeaders: Automatic security headers (HSTS, CSP, etc.)
+  - RateLimitByUser: User/IP-based rate limiting
+  - ConvertEmptyStringsToNull: Clean request data
+  - TrimStrings: Auto-trim inputs with exceptions
+  - ApiVersioning: Multi-version API support
+  - CorsMiddleware: Advanced CORS configuration
 - **Database**
   - Migrations for all tables (model_histories, photo_images, files, videos, roles, permissions, user_integrations, pivot tables)
   - Example seeder for roles and permissions

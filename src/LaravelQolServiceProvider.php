@@ -7,6 +7,16 @@ use Illuminate\Routing\Router;
 use Bywyd\LaravelQol\Middleware\RoleMiddleware;
 use Bywyd\LaravelQol\Middleware\PermissionMiddleware;
 use Bywyd\LaravelQol\Middleware\RoleOrPermissionMiddleware;
+use Bywyd\LaravelQol\Middleware\SetLocale;
+use Bywyd\LaravelQol\Middleware\RestrictAccess;
+use Bywyd\LaravelQol\Middleware\ForceJsonResponse;
+use Bywyd\LaravelQol\Middleware\LogRequestResponse;
+use Bywyd\LaravelQol\Middleware\SecurityHeaders;
+use Bywyd\LaravelQol\Middleware\RateLimitByUser;
+use Bywyd\LaravelQol\Middleware\ConvertEmptyStringsToNull;
+use Bywyd\LaravelQol\Middleware\TrimStrings;
+use Bywyd\LaravelQol\Middleware\ApiVersioning;
+use Bywyd\LaravelQol\Middleware\CorsMiddleware;
 use Bywyd\LaravelQol\Console\ServiceMakeCommand;
 use Bywyd\LaravelQol\Console\DtoMakeCommand;
 use Bywyd\LaravelQol\Console\ActionMakeCommand;
@@ -40,6 +50,14 @@ class LaravelQolServiceProvider extends ServiceProvider
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'laravel-qol-migrations');
 
+        // Publish views
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/laravel-qol'),
+        ], 'laravel-qol-views');
+
+        // Load views
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-qol');
+
         // Load migrations automatically if running in console
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
@@ -50,6 +68,16 @@ class LaravelQolServiceProvider extends ServiceProvider
         $router->aliasMiddleware('role', RoleMiddleware::class);
         $router->aliasMiddleware('permission', PermissionMiddleware::class);
         $router->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
+        $router->aliasMiddleware('locale', SetLocale::class);
+        $router->aliasMiddleware('restrict.access', RestrictAccess::class);
+        $router->aliasMiddleware('force.json', ForceJsonResponse::class);
+        $router->aliasMiddleware('log.request', LogRequestResponse::class);
+        $router->aliasMiddleware('security.headers', SecurityHeaders::class);
+        $router->aliasMiddleware('rate.limit.user', RateLimitByUser::class);
+        $router->aliasMiddleware('convert.empty.strings', ConvertEmptyStringsToNull::class);
+        $router->aliasMiddleware('trim.strings', TrimStrings::class);
+        $router->aliasMiddleware('api.version', ApiVersioning::class);
+        $router->aliasMiddleware('cors', CorsMiddleware::class);
 
         // Register permissions and blade directives
         if (config('laravel-qol.permissions.enable_blade_directives', true)) {

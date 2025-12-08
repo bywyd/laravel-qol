@@ -898,6 +898,166 @@ All sensitive data is automatically encrypted:
 
 The trait uses Laravel's built-in encryption, ensuring data is secure at rest.
 
+## Middleware
+
+The package includes 10 production-ready middleware:
+
+### SetLocale Middleware
+
+Automatically sets application locale based on multiple sources (priority order):
+
+```php
+// In your routes or middleware group
+Route::middleware('locale')->group(function () {
+    // Your routes
+});
+
+// Supports:
+// 1. Query parameter: ?locale=es
+// 2. Session: session('locale')
+// 3. User preference: $user->getPreferredLocale()
+// 4. Cookie: locale=fr
+// 5. Accept-Language header
+```
+
+### RestrictAccess Middleware
+
+Maintenance mode with granular access control:
+
+```php
+// Enable in .env
+ACCESS_RESTRICTION_ENABLED=true
+ALLOWED_IPS="192.168.1.1,10.0.0.0/24,172.16.*.*"
+BYPASS_TOKEN=secret-token-123
+
+// Apply to routes
+Route::middleware('restrict.access')->group(function () {
+    // Protected routes
+});
+
+// Access with bypass token
+// ?bypass_token=secret-token-123
+// Header: X-Bypass-Token: secret-token-123
+```
+
+### ForceJsonResponse Middleware
+
+Force JSON responses for API applications:
+
+```php
+Route::middleware('force.json')->group(function () {
+    // All responses will be JSON
+});
+```
+
+### LogRequestResponse Middleware
+
+Log all HTTP requests and responses:
+
+```php
+Route::middleware('log.request')->group(function () {
+    // Requests/responses logged
+});
+
+// Configure in config/laravel-qol.php
+'logging' => [
+    'log_requests' => true,
+    'log_responses' => true,
+    'log_request_body' => false,
+    'log_response_body' => false,
+    'sensitive_keys' => ['password', 'token'],
+],
+```
+
+### SecurityHeaders Middleware
+
+Add security headers automatically:
+
+```php
+Route::middleware('security.headers')->group(function () {
+    // Security headers added
+});
+
+// Adds: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection,
+// HSTS, CSP, Referrer-Policy, Permissions-Policy
+```
+
+### RateLimitByUser Middleware
+
+Rate limiting per user or IP:
+
+```php
+// 60 requests per minute
+Route::middleware('rate.limit.user:60,1')->group(function () {
+    //
+});
+
+// 100 requests per 5 minutes
+Route::middleware('rate.limit.user:100,5')->group(function () {
+    //
+});
+```
+
+### ConvertEmptyStringsToNull Middleware
+
+Convert empty strings to null in requests:
+
+```php
+Route::middleware('convert.empty.strings')->group(function () {
+    // '' becomes null
+});
+```
+
+### TrimStrings Middleware
+
+Automatically trim string inputs:
+
+```php
+Route::middleware('trim.strings')->group(function () {
+    // All strings trimmed (except passwords)
+});
+```
+
+### ApiVersioning Middleware
+
+API versioning support:
+
+```php
+// Require specific version
+Route::middleware('api.version:v1')->group(function () {
+    //
+});
+
+// Accept any supported version
+Route::middleware('api.version')->group(function () {
+    $version = request()->attributes->get('api_version');
+});
+
+// Version sources:
+// - Header: Accept: application/vnd.api.v1+json
+// - Header: X-API-Version: v1
+// - Query: ?version=v1
+// - URL: /api/v1/users
+```
+
+### CorsMiddleware
+
+Advanced CORS handling:
+
+```php
+Route::middleware('cors')->group(function () {
+    //
+});
+
+// Configure in config/laravel-qol.php
+'cors' => [
+    'allowed_origins' => ['*'],
+    'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE'],
+    'allowed_headers' => ['Content-Type', 'Authorization'],
+    'allow_credentials' => false,
+],
+```
+
 
 ## Available Traits
 

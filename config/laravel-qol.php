@@ -111,4 +111,109 @@ return [
         // Cache TTL in seconds
         'cache_ttl' => 3600,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Localization Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'localization' => [
+        'supported_locales' => ['en', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'pt', 'ru', 'it'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Access Restriction Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'access_restriction' => [
+        'enabled' => env('ACCESS_RESTRICTION_ENABLED', false),
+        'allowed_ips' => env('ALLOWED_IPS') ? explode(',', env('ALLOWED_IPS')) : [],
+        'allowed_roles' => ['super-admin', 'admin'],
+        'bypass_token' => env('BYPASS_TOKEN'),
+        'message' => 'Service temporarily unavailable. We will be back soon!',
+        'view' => 'laravel-qol::maintenance',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Security Headers Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'security_headers' => [
+        'X-Frame-Options' => 'SAMEORIGIN',
+        'X-Content-Type-Options' => 'nosniff',
+        'X-XSS-Protection' => '1; mode=block',
+        'Referrer-Policy' => 'strict-origin-when-cross-origin',
+        'Permissions-Policy' => 'geolocation=(), microphone=(), camera=()',
+        'enable_hsts' => true,
+        'hsts_max_age' => 31536000, // 1 year
+        'content_security_policy' => null, // e.g., "default-src 'self'"
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logging Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'logging' => [
+        'channel' => env('LOG_CHANNEL', 'stack'),
+        'log_requests' => true,
+        'log_responses' => true,
+        'log_request_body' => false,
+        'log_response_body' => false,
+        'log_headers' => false,
+        'sensitive_keys' => [
+            'password',
+            'password_confirmation',
+            'token',
+            'api_key',
+            'api_secret',
+            'secret',
+            'credit_card',
+            'cvv',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Trim Strings Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'trim_strings' => [
+        'except' => [
+            'current_password',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Versioning Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'api_versioning' => [
+        'default_version' => 'v1',
+        'supported_versions' => ['v1', 'v2'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | CORS Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'cors' => [
+        'allowed_origins' => ['*'],
+        'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-API-Version'],
+        'exposed_headers' => [],
+        'max_age' => 3600,
+        'allow_credentials' => false,
+    ],
 ];
