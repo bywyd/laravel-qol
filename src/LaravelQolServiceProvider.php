@@ -21,6 +21,8 @@ use Bywyd\LaravelQol\Console\ServiceMakeCommand;
 use Bywyd\LaravelQol\Console\DtoMakeCommand;
 use Bywyd\LaravelQol\Console\ActionMakeCommand;
 use Bywyd\LaravelQol\Console\ModuleMakeCommand;
+use Bywyd\LaravelQol\Support\RequestMacros;
+use Bywyd\LaravelQol\Support\CollectionMacros;
 
 class LaravelQolServiceProvider extends ServiceProvider
 {
@@ -38,6 +40,9 @@ class LaravelQolServiceProvider extends ServiceProvider
         $this->app->singleton('laravel-qol.settings', function ($app) {
             return new \Bywyd\LaravelQol\Services\SettingsManager();
         });
+
+        // Load helper functions
+        require_once __DIR__.'/Support/helpers.php';
     }
 
     /**
@@ -45,6 +50,9 @@ class LaravelQolServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register Request and Collection macros
+        RequestMacros::register();
+        CollectionMacros::register();
         // Publish configuration
         $this->publishes([
             __DIR__.'/../config/laravel-qol.php' => config_path('laravel-qol.php'),
