@@ -6,6 +6,7 @@ use Bywyd\LaravelQol\Models\UserIntegration;
 use Bywyd\LaravelQol\Tests\Fixtures\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class HasIntegrationsTest extends TestCase
 {
@@ -68,7 +69,7 @@ class HasIntegrationsTest extends TestCase
         ]);
 
         // Raw database value should be encrypted
-        $rawIntegration = \DB::table('user_integrations')->find($integration->id);
+        $rawIntegration = DB::table('user_integrations')->find($integration->id);
         $this->assertNotEquals('plain_token_123', $rawIntegration->access_token);
 
         // Decrypted value should match

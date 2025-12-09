@@ -9,9 +9,16 @@ use Illuminate\Support\Facades\Auth;
 trait HasHistory
 {
     /**
+     * Models with history logging temporarily disabled.
+     *
+     * @var array
+     */
+    protected static $modelsWithHistoryDisabled = [];
+
+    /**
      * Boot the HasHistory trait for a model.
      */
-    protected static function bootHasHistory(): void
+    protected static function bootHasHistory()
     {
         static::created(function ($model) {
             if ($model->shouldLogHistory('created')) {
@@ -29,10 +36,8 @@ trait HasHistory
             if ($model->shouldLogHistory('deleted')) {
                 $model->logHistory(HistoryLogTypes::DELETED, 'Model deleted');
             }
-        });
-
-        static::deleting(function ($model) {
-            // Delete associated histories when the model is being deleted
+            
+            // Delete associated histories AFTER logging the deletion
             if ($model->shouldDeleteHistoriesOnDelete()) {
                 $model->histories()->delete();
             }
@@ -177,7 +182,9 @@ trait HasHistory
      */
     protected function shouldLogHistory(string $event): bool
     {
-        if (property_exists($this, 'disableHistoryLogging') && $this->disableHistoryLogging === true) {
+        $modelKey = get_class($this) . ':' . ($this->getKey() ?? 'new');
+        
+        if (isset(static::$modelsWithHistoryDisabled[$modelKey])) {
             return false;
         }
 
@@ -210,12 +217,13 @@ trait HasHistory
      */
     public function withoutHistory(callable $callback)
     {
-        $this->disableHistoryLogging = true;
+        $modelKey = get_class($this) . ':' . ($this->getKey() ?? 'new');
+        static::$modelsWithHistoryDisabled[$modelKey] = true;
 
         try {
             return $callback($this);
         } finally {
-            $this->disableHistoryLogging = false;
+            unset(static::$modelsWithHistoryDisabled[$modelKey]);
         }
     }
 

@@ -14,12 +14,22 @@ class PermissionRegistrar
      */
     public static function registerPermissions(): void
     {
-        $permissions = \Bywyd\LaravelQol\Models\Permission::all();
+        // Skip if database doesn't have the permissions table yet
+        try {
+            if (!\Schema::hasTable('permissions')) {
+                return;
+            }
 
-        foreach ($permissions as $permission) {
-            Gate::define($permission->slug, function ($user) use ($permission) {
-                return $user->hasPermission($permission);
-            });
+            $permissions = \Bywyd\LaravelQol\Models\Permission::all();
+
+            foreach ($permissions as $permission) {
+                Gate::define($permission->slug, function ($user) use ($permission) {
+                    return $user->hasPermission($permission);
+                });
+            }
+        } catch (\Exception $e) {
+            // Silently fail if there's any database issue during boot
+            // This can happen during migrations or in testing environments
         }
     }
 

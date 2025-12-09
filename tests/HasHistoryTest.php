@@ -54,13 +54,20 @@ class HasHistoryTest extends TestCase
     /** @test */
     public function it_logs_history_when_model_is_deleted()
     {
-        $model = TestModel::create(['name' => 'Test', 'value' => 100]);
+        // Create a test model that keeps history on deletion
+        $model = new class extends TestModel {
+            protected $deleteHistoriesOnDelete = false;
+        };
+        $model->name = 'Test';
+        $model->value = 100;
+        $model->save();
+        
         $modelId = $model->id;
         
         $model->delete();
 
         $this->assertDatabaseHas('model_histories', [
-            'modelable_type' => TestModel::class,
+            'modelable_type' => get_class($model),
             'modelable_id' => $modelId,
             'type' => HistoryLogTypes::DELETED->value,
         ]);

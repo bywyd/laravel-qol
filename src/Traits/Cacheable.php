@@ -7,15 +7,29 @@ use Illuminate\Support\Facades\Cache;
 trait Cacheable
 {
     /**
+     * Store tracked cache keys.
+     *
+     * @var array
+     */
+    protected $trackedCacheKeys = [];
+
+    /**
      * Clear the cache for this model.
      *
      * @return void
      */
     public function clearCache(): void
     {
+        // Clear base cache keys
         Cache::forget($this->getCacheKey());
         Cache::forget($this->getCacheKey('all'));
 
+        // Clear all tracked cache keys
+        foreach ($this->trackedCacheKeys as $key) {
+            Cache::forget($key);
+        }
+
+        // Clear additional custom keys if defined
         if (method_exists($this, 'getAdditionalCacheKeys')) {
             foreach ($this->getAdditionalCacheKeys() as $key) {
                 Cache::forget($key);
@@ -78,6 +92,11 @@ trait Cacheable
         $cacheKey = $this->getCacheKey($key);
         $ttl = $ttl ?? $this->getCacheTtl();
 
+        // Track this cache key for later clearing
+        if (!in_array($cacheKey, $this->trackedCacheKeys)) {
+            $this->trackedCacheKeys[] = $cacheKey;
+        }
+
         return Cache::remember($cacheKey, $ttl, $callback);
     }
 
@@ -91,6 +110,11 @@ trait Cacheable
     public function rememberForever(string $key, callable $callback)
     {
         $cacheKey = $this->getCacheKey($key);
+
+        // Track this cache key for later clearing
+        if (!in_array($cacheKey, $this->trackedCacheKeys)) {
+            $this->trackedCacheKeys[] = $cacheKey;
+        }
 
         return Cache::rememberForever($cacheKey, $callback);
     }

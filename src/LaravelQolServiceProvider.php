@@ -89,8 +89,12 @@ class LaravelQolServiceProvider extends ServiceProvider
             PermissionRegistrar::registerBladeDirectives();
         }
 
+        // Register permissions as gates after the app is booted
+        // This ensures migrations have run in testing environments
         if (config('laravel-qol.permissions.auto_register_permissions_as_gates', true)) {
-            PermissionRegistrar::registerPermissions();
+            $this->app->booted(function () {
+                PermissionRegistrar::registerPermissions();
+            });
         }
 
         // Register Artisan commands

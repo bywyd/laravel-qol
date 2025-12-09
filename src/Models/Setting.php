@@ -30,9 +30,9 @@ class Setting extends Model
     /**
      * Get the parent settable model.
      */
-    public function setTable(): MorphTo
+    public function owner(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo('settable');
     }
 
     /**
