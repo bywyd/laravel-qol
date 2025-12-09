@@ -1257,6 +1257,446 @@ foreach ($preferences as $key => $value) {
 }
 ```
 
+### CommonScopes Trait
+
+Add powerful query scopes to your models:
+
+```php
+use Bywyd\LaravelQol\Traits\CommonScopes;
+
+class Product extends Model
+{
+    use CommonScopes;
+}
+
+// Usage examples:
+Product::active()->get();
+Product::recent(7)->get(); // Last 7 days
+Product::thisMonth()->get();
+Product::popular('views_count', 100)->get();
+Product::published()->get();
+Product::whereLike('search term', ['name', 'description'])->get();
+Product::smartPaginate(20); // Auto-handles per_page from request
+```
+
+Available scopes: `active()`, `inactive()`, `recent()`, `older()`, `today()`, `thisWeek()`, `thisMonth()`, `thisYear()`, `betweenDates()`, `latest()`, `oldest()`, `whereIds()`, `whereNotIds()`, `whereLike()`, `whereEmpty()`, `whereNotEmpty()`, `random()`, `popular()`, `featured()`, `published()`, `draft()`, `smartPaginate()`
+
+### ApiResponse Trait
+
+Standardized API responses for controllers:
+
+```php
+use Bywyd\LaravelQol\Traits\ApiResponse;
+
+class UserController extends Controller
+{
+    use ApiResponse;
+
+    public function index()
+    {
+        $users = User::paginate();
+        return $this->paginated($users, 'Users retrieved successfully');
+    }
+
+    public function store(Request $request)
+    {
+        $user = User::create($request->validated());
+        return $this->created($user, 'User created successfully');
+    }
+
+    public function show(User $user)
+    {
+        return $this->success($user);
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $user->update($request->validated());
+        return $this->updated($user);
+    }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+        return $this->deleted();
+    }
+}
+```
+
+Available methods: `success()`, `error()`, `created()`, `updated()`, `deleted()`, `notFound()`, `unauthorized()`, `forbidden()`, `validationError()`, `serverError()`, `paginated()`, `noContent()`
+
+### Request Macros
+
+Enhanced request handling:
+
+```php
+// Check if any of the keys exist
+if (request()->hasAny(['email', 'username'])) {
+    // ...
+}
+
+// Check if all keys exist
+if (request()->hasAll(['name', 'email', 'password'])) {
+    // ...
+}
+
+// Get boolean value (handles 'true', '1', 'yes', 'on')
+$active = request()->boolean('is_active', false);
+
+// Get array of IDs from comma-separated or array
+$ids = request()->ids('user_ids'); // "1,2,3" or [1,2,3] => [1,2,3]
+
+// Get sanitized search term
+$search = request()->search('q');
+
+// Get real IP (considering proxies, Cloudflare, etc.)
+$ip = request()->realIp();
+
+// Check if mobile device
+if (request()->isMobile()) {
+    // ...
+}
+
+// Get sort parameters
+$sort = request()->sort('created_at', 'desc');
+// Returns: ['column' => 'created_at', 'direction' => 'desc']
+
+// Get filters (removes empty values)
+$filters = request()->filters(['status', 'category', 'price_min']);
+```
+
+### Collection Macros
+
+Extended collection functionality:
+
+```php
+// Recursively convert to array
+$data = collect($nested)->recursive()->toArray();
+
+// Group by multiple keys
+$grouped = $users->groupByMultiple(['country', 'city']);
+
+// Export to CSV
+$csv = $users->toCsv(['ID', 'Name', 'Email']);
+
+// Check for duplicates
+if ($items->hasDuplicates('email')) {
+    // ...
+}
+
+// Transpose (rows to columns)
+$transposed = collect([[1, 2], [3, 4]])->transpose();
+// Result: [[1, 3], [2, 4]]
+
+// Get statistics
+$stats = $numbers->stats();
+// Returns: ['count', 'sum', 'avg', 'min', 'max', 'median']
+
+// Filter null/empty values
+$filtered = $collection->filterNull()->filterEmpty();
+
+// Manual pagination
+$paginated = $collection->paginate(15);
+```
+
+### Validation Rules
+
+Custom validation rules:
+
+```php
+use Bywyd\LaravelQol\Rules\PhoneNumber;
+use Bywyd\LaravelQol\Rules\StrongPassword;
+use Bywyd\LaravelQol\Rules\Username;
+
+// Phone number validation
+'phone' => ['required', new PhoneNumber()],
+
+// Strong password validation
+'password' => [
+    'required',
+    new StrongPassword(
+        minLength: 8,
+        requireUppercase: true,
+        requireLowercase: true,
+        requireNumbers: true,
+        requireSpecialChars: true
+    )
+],
+
+// Username validation
+'username' => [
+    'required',
+    new Username(
+        minLength: 3,
+        maxLength: 20,
+        allowDash: true,
+        allowUnderscore: true,
+        allowDot: false
+    )
+],
+```
+
+### Helper Functions
+
+Global utility functions:
+
+```php
+// Limit words in string
+$excerpt = str_limit_words($text, 10);
+
+// Simple money formatting
+$price = money_format_simple(1234.56, '$', 2); // "$1,234.56"
+
+// Calculate percentage
+$percent = percentage(25, 100); // 25.00
+
+// Filter array recursively
+$filtered = array_filter_recursive($array);
+
+// Sanitize filename
+$safe = sanitize_filename('My File (1).pdf'); // "My_File_1.pdf"
+
+// Generate random string
+$token = generate_random_string(32); // Alphanumeric
+$password = generate_random_string(16, false); // With special chars
+
+// Convert bytes to human readable
+$size = bytes_to_human(1048576); // "1.00 MB"
+
+// Convert human readable to bytes
+$bytes = human_to_bytes('10MB'); // 10485760
+
+// Check if string is valid JSON
+if (is_json($string)) {
+    // ...
+}
+
+// Safe Carbon parsing
+$date = carbon_parse_safe($input, now());
+
+// Active route helper (for navigation)
+<li class="{{ active_route(['users.*', 'profile']) }}">Users</li>
+
+// Get client browser
+$browser = get_client_browser(); // "Chrome", "Firefox", etc.
+
+// Truncate middle of string
+$truncated = truncate_middle('very-long-filename.txt', 20); // "very-long...ame.txt"
+```
+
+### Database Utilities
+
+#### QueryLogger
+
+Log and analyze database queries:
+
+```php
+use Bywyd\LaravelQol\Utilities\QueryLogger;
+
+// Enable query logging
+QueryLogger::enable();
+
+// Your code here...
+User::all();
+Post::with('comments')->get();
+
+// Get all queries
+$queries = QueryLogger::getQueries();
+
+// Get total execution time
+$time = QueryLogger::getTotalTime(); // in milliseconds
+
+// Get query count
+$count = QueryLogger::getCount();
+
+// Get slowest queries
+$slow = QueryLogger::getSlowestQueries(10);
+
+// Log to file
+QueryLogger::logToFile('database');
+
+// Dump for debugging
+QueryLogger::dump();
+
+// Clear logged queries
+QueryLogger::clear();
+
+// Disable logging
+QueryLogger::disable();
+```
+
+#### ModelUtility
+
+Useful model introspection methods:
+
+```php
+use Bywyd\LaravelQol\Utilities\ModelUtility;
+
+// Get table columns
+$columns = ModelUtility::getTableColumns(User::class);
+
+// Get fillable columns
+$fillable = ModelUtility::getFillableColumns($user);
+
+// Get hidden columns
+$hidden = ModelUtility::getHiddenColumns($user);
+
+// Get dirty (changed but not saved) attributes
+$dirty = ModelUtility::getDirtyAttributes($user);
+
+// Get changed attributes after save
+$changes = ModelUtility::getChangedAttributes($user);
+
+// Check if attribute exists
+if (ModelUtility::hasAttribute($user, 'email')) {
+    // ...
+}
+
+// Clone model
+$clone = ModelUtility::cloneModel($user, ['id', 'created_at']);
+
+// Get loaded relations
+$relations = ModelUtility::getLoadedRelations($user);
+
+// Check if relation is loaded
+if (ModelUtility::isRelationLoaded($user, 'posts')) {
+    // ...
+}
+
+// Diff two models
+$diff = ModelUtility::diff($originalUser, $modifiedUser);
+// Returns: ['email' => ['old' => 'old@example.com', 'new' => 'new@example.com']]
+```
+
+## Usage Examples
+
+### Example 1: API Controller with All Features
+
+```php
+use App\Models\Product;
+use Bywyd\LaravelQol\Traits\ApiResponse;
+use Bywyd\LaravelQol\Rules\StrongPassword;
+use Illuminate\Http\Request;
+
+class ProductController extends Controller
+{
+    use ApiResponse;
+
+    public function index(Request $request)
+    {
+        $query = Product::query();
+
+        // Use CommonScopes
+        if ($request->boolean('active_only')) {
+            $query->active();
+        }
+
+        if ($search = $request->search('q')) {
+            $query->whereLike($search, ['name', 'description']);
+        }
+
+        // Use Request macros for sorting
+        $sort = $request->sort('created_at', 'desc');
+        $query->orderBy($sort['column'], $sort['direction']);
+
+        // Smart pagination
+        $products = $query->smartPaginate();
+
+        return $this->paginated($products, 'Products retrieved successfully');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'is_active' => 'boolean',
+        ]);
+
+        $product = Product::create($validated);
+
+        return $this->created($product, 'Product created successfully');
+    }
+}
+```
+
+### Example 2: Using Utilities for Performance Monitoring
+
+```php
+use Bywyd\LaravelQol\Utilities\QueryLogger;
+
+// In a middleware or service provider
+if (app()->environment('local')) {
+    QueryLogger::enable();
+
+    app()->terminating(function () {
+        if (QueryLogger::getCount() > 50) {
+            logger()->warning('High query count detected', [
+                'total_queries' => QueryLogger::getCount(),
+                'total_time' => QueryLogger::getTotalTime(),
+                'slowest' => QueryLogger::getSlowestQueries(5),
+            ]);
+        }
+    });
+}
+```
+
+### Example 3: Model with All Traits
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Bywyd\LaravelQol\Traits\{
+    HasHistory,
+    HasRoles,
+    HasSettings,
+    HasUuid,
+    HasSlug,
+    HasStatus,
+    Sortable,
+    Cacheable,
+    Searchable,
+    CommonScopes
+};
+
+class Article extends Model
+{
+    use HasHistory,
+        HasRoles,
+        HasSettings,
+        HasUuid,
+        HasSlug,
+        HasStatus,
+        Sortable,
+        Cacheable,
+        Searchable,
+        CommonScopes;
+
+    protected $fillable = ['title', 'content', 'status'];
+    protected $slugSource = 'title';
+    protected $searchable = ['title', 'content'];
+
+    // Now you have access to all features:
+    // - History tracking
+    // - Role-based permissions
+    // - Per-model settings
+    // - UUID primary key
+    // - Auto-generated slugs
+    // - Status management
+    // - Sortable ordering
+    // - Model caching
+    // - Full-text search
+    // - Query scopes
+}
+
+// Usage
+$article = Article::create(['title' => 'My Article', 'content' => '...']);
+$article->logHistory(HistoryLogTypes::CUSTOM, 'Published');
+$article->setSetting('views_count', 0);
+$articles = Article::active()->published()->thisMonth()->get();
+```
+
+
+
 
 ## Available Traits
 
