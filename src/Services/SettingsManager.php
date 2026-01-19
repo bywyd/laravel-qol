@@ -228,7 +228,7 @@ class SettingsManager
      * @param string $key
      * @return string
      */
-    protected function getCacheKey(string $group, string $key): string
+    protected function getCacheKey(string | null $group, string $key): string
     {
         return "setting:app:{$group}:{$key}";
     }
