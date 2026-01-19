@@ -16,14 +16,19 @@ class SettingsManager
      * @param string|null $group
      * @return mixed
      */
-    public function get(string $key, $default = null, ?string $group = 'general')
+    public function get(string $key, $default = null, ?string $group = null)
     {
         $cacheKey = $this->getCacheKey($group, $key);
 
         return Cache::remember($cacheKey, config('laravel-qol.settings.cache_ttl', 3600), function () use ($key, $group, $default) {
             $setting = Setting::appWide()
                 ->where('key', $key)
-                ->where('group', $group)
+                // ->where('group', $group)
+                ->where(function($query) use ($group) {
+                    if (!is_null($group)) {
+                        $query->where('group', $group);
+                    }
+                })
                 ->first();
 
             return $setting ? $setting->getCastedValue() : $default;
@@ -73,11 +78,16 @@ class SettingsManager
      * @param string|null $group
      * @return bool
      */
-    public function has(string $key, ?string $group = 'general'): bool
+    public function has(string $key, ?string $group = null): bool
     {
         return Setting::appWide()
             ->where('key', $key)
-            ->where('group', $group)
+            // ->where('group', $group)
+            ->where(function($query) use ($group) {
+                if (!is_null($group)) {
+                    $query->where('group', $group);
+                }
+            })
             ->exists();
     }
 
@@ -92,7 +102,11 @@ class SettingsManager
     {
         return Setting::appWide()
             ->where('key', $key)
-            ->where('group', $group)
+            ->where(function($query) use ($group) {
+                if (!is_null($group)) {
+                    $query->where('group', $group);
+                }
+            })
             ->delete();
     }
 
@@ -199,7 +213,7 @@ class SettingsManager
      * @param string|null $group
      * @return bool
      */
-    public function toggle(string $key, ?string $group = 'general'): bool
+    public function toggle(string $key, ?string $group = null): bool
     {
         $value = $this->get($key, false, $group);
         $newValue = !$value;
